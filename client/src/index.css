@@ -1,0 +1,11 @@
+/* A simple CSS Reset */
+body, h1, h2, p, ul, li, form, input, button {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif;
+}
+
+body {
+    background-color: #f4f7f6;
+}
