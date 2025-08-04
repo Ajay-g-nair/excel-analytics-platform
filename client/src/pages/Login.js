@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 
-// Note the new '{ setUser }' prop here. This is how App.js gives this component
-// the ability to change the main application's state.
 const Login = ({ setUser }) => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [message, setMessage] = useState('');
@@ -11,34 +9,39 @@ const Login = ({ setUser }) => {
 
     const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
+    // This is the updated onSubmit function with the new logic
     const onSubmit = async (e) => {
         e.preventDefault();
         try {
-            // We send the login request to the live backend server.
             const res = await axios.post('https://sheetsight.onrender.com/api/users/login', formData);
+            const { token, user } = res.data;
 
-            // If the login is successful, we perform four actions:
-            // 1. Store the login token in the browser's memory.
-            localStorage.setItem('token', res.data.token);
-            // 2. Store the user's details (including their role) in memory.
-            localStorage.setItem('user', JSON.stringify(res.data.user));
-            // 3. Call the 'setUser' function given to us by App.js to update the navbar.
-            setUser(res.data.user);
-            
+            // Store the token and user info in the browser
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user));
+
+            // Update the main App state to change the navbar
+            setUser(user);
             setMessage('Login successful! Redirecting...');
-            
-            // 4. Navigate the user to the main dashboard page.
-            navigate('/');
+
+            // --- THIS IS THE NEW REDIRECTION LOGIC ---
+            // 1. Check the user's role.
+            if (user.role === 'admin') {
+                // 2. If they are an admin, navigate to the Admin Panel.
+                navigate('/admin');
+            } else {
+                // 3. Otherwise, navigate to the regular user Dashboard.
+                navigate('/dashboard');
+            }
 
         } catch (err) {
-            // If the login fails, we clear any old data from memory.
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             setMessage(err.response.data.msg || 'Something went wrong');
         }
     };
 
-    // --- All the CSS styles for this component ---
+    // --- All the CSS styles are unchanged ---
     const styles = {
         container: { minHeight: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' },
         card: { backgroundColor: 'white', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', maxWidth: '400px', width: '100%', textAlign: 'center' },
@@ -54,22 +57,13 @@ const Login = ({ setUser }) => {
         <div style={styles.container}>
             <div style={styles.card}>
                 <h1 style={styles.title}>Sign In</h1>
-                
-                {message && (
-                    <p style={{ ...styles.message, backgroundColor: message.startsWith('Login successful') ? '#28a745' : '#dc3545' }}>
-                        {message}
-                    </p>
-                )}
-
+                {message && <p style={{ ...styles.message, backgroundColor: message.startsWith('Login successful') ? '#28a745' : '#dc3545' }}>{message}</p>}
                 <form onSubmit={onSubmit} style={styles.form}>
                     <input type="email" placeholder="Email Address" name="email" value={formData.email} onChange={onChange} required style={styles.input} />
                     <input type="password" placeholder="Password" name="password" value={formData.password} onChange={onChange} required style={styles.input} />
                     <button type="submit" style={styles.button}>Login</button>
                 </form>
-
-                <p style={{ marginTop: '1.5rem', fontSize: '0.9rem' }}>
-                    Don't have an account? <Link to="/register" style={styles.link}>Sign up</Link>
-                </p>
+                <p style={{ marginTop: '1.5rem', fontSize: '0.9rem' }}>Don't have an account? <Link to="/register" style={styles.link}>Sign up</Link></p>
             </div>
         </div>
     );

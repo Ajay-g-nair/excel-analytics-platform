@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import Admin from './pages/Admin';
+import Guest from './pages/Guest'; // 1. Import our new Guest page
 
 const App = () => (<Router><Layout /></Router>);
 
@@ -12,6 +13,7 @@ const Layout = () => {
     const [user, setUser] = useState(null);
     const navigate = useNavigate();
 
+    // This hook checks for a logged-in user when the app loads
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
@@ -23,9 +25,10 @@ const Layout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
-        navigate('/login');
+        navigate('/'); // On logout, go to the Guest page
     };
 
+    // --- All the CSS styles ---
     const navStyle = { backgroundColor: 'white', padding: '1rem 2rem', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
     const linkStyle = { textDecoration: 'none', color: '#007bff', margin: '0 10px', fontWeight: 'bold', cursor: 'pointer' };
     const logoStyle = { ...linkStyle, fontSize: '1.5rem', color: '#333' };
@@ -38,8 +41,8 @@ const Layout = () => {
                 <div>
                     {user ? (
                         <>
-                            {user.role === 'admin' && <Link to="/admin" style={linkStyle}>Admin</Link>}
-                            <Link to="/" style={linkStyle}>Dashboard</Link>
+                            {user.role === 'admin' && <Link to="/admin" style={linkStyle}>Admin Panel</Link>}
+                            <Link to="/dashboard" style={linkStyle}>Dashboard</Link>
                             <span onClick={handleLogout} style={linkStyle}>Logout</span>
                         </>
                     ) : (
@@ -52,9 +55,11 @@ const Layout = () => {
             </nav>
             <main style={{ padding: '2rem' }}>
                 <Routes>
+                    {/* 2. Update the routes with the new logic */}
+                    <Route path="/" element={<Guest />} />
                     <Route path="/login" element={<Login setUser={setUser} />} />
                     <Route path="/register" element={<Register />} />
-                    <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                    <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                     <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
                 </Routes>
             </main>
