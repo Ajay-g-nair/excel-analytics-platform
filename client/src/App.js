@@ -5,20 +5,31 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import Admin from './pages/Admin';
-import Guest from './pages/Guest'; // 1. Import our new Guest page
+import Guest from './pages/Guest';
 
 const App = () => (<Router><Layout /></Router>);
 
 const Layout = () => {
-    const [user, setUser] = useState(null);
+    // We initialize the user state by checking localStorage synchronously.
+    const [user, setUser] = useState(() => {
+        const storedUser = localStorage.getItem('user');
+        try {
+            return storedUser ? JSON.parse(storedUser) : null;
+        } catch (error) {
+            console.error("Failed to parse user from localStorage", error);
+            return null;
+        }
+    });
     const navigate = useNavigate();
 
-    // This hook checks for a logged-in user when the app loads
+    // This effect is for syncing state between tabs.
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
+        const handleStorageChange = () => {
+            const storedUser = localStorage.getItem('user');
+            setUser(storedUser ? JSON.parse(storedUser) : null);
+        };
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
     }, []);
 
     const handleLogout = () => {
@@ -28,7 +39,7 @@ const Layout = () => {
         navigate('/'); // On logout, go to the Guest page
     };
 
-    // --- All the CSS styles ---
+    // --- All CSS styles ---
     const navStyle = { backgroundColor: 'white', padding: '1rem 2rem', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
     const linkStyle = { textDecoration: 'none', color: '#007bff', margin: '0 10px', fontWeight: 'bold', cursor: 'pointer' };
     const logoStyle = { ...linkStyle, fontSize: '1.5rem', color: '#333' };
@@ -54,9 +65,10 @@ const Layout = () => {
                 </div>
             </nav>
             <main style={{ padding: '2rem' }}>
+                {/* Final check for deployment */}
                 <Routes>
-                    {/* 2. Update the routes with the new logic */}
                     <Route path="/" element={<Guest />} />
+                    {/* We pass the 'setUser' function to Login so it can update the navbar */}
                     <Route path="/login" element={<Login setUser={setUser} />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
