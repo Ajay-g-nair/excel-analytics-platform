@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 
-const Login = () => {
+// Note the new '{ setIsLoggedIn }' prop here
+const Login = ({ setIsLoggedIn }) => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
@@ -13,9 +14,18 @@ const Login = () => {
         e.preventDefault();
         try {
             const res = await axios.post('https://sheetsight.onrender.com/api/users/login', formData);
+            
+            // 1. Store the token
             localStorage.setItem('token', res.data.token);
+            
+            // 2. THIS IS THE NEW LINE: Update the state in App.js to show the "Logout" button
+            setIsLoggedIn(true);
+
             setMessage('Login successful! Redirecting...');
+            
+            // 3. Redirect to the dashboard
             navigate('/');
+
         } catch (err) {
             setMessage(err.response.data.msg || 'Something went wrong');
         }
