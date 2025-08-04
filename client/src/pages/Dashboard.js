@@ -29,7 +29,10 @@ const Dashboard = () => {
             setMessage('Could not fetch file history.');
         }
     };
-    useEffect(() => { fetchFileHistory(); }, []);
+
+    useEffect(() => {
+        fetchFileHistory();
+    }, []);
 
     useEffect(() => {
         if (selectedFile && xAxis !== '' && yAxis !== '') {
@@ -37,6 +40,7 @@ const Dashboard = () => {
             const yIndex = parseInt(yAxis);
             const labels = selectedFile.data.map(row => row[xIndex] || '');
             const dataPoints = selectedFile.data.map(row => parseFloat(row[yIndex]) || 0);
+
             setChartData({
                 labels,
                 datasets: [{
@@ -56,6 +60,7 @@ const Dashboard = () => {
         setFile(e.target.files[0]);
         setMessage('');
     };
+
     const handleUpload = async () => {
         if (!file) return;
         setMessage("Uploading...");
@@ -69,12 +74,12 @@ const Dashboard = () => {
             setMessage('Success: File uploaded!');
             setFile(null);
             if(fileInputRef.current) fileInputRef.current.value = "";
-            fetchFileHistory();
+            fetchFileHistory(); // Refresh list after upload
         } catch (error) {
-            console.error("Upload failed:", error);
             setMessage('Upload failed.');
         }
     };
+
     const handleFileSelect = (fileData) => {
         setSelectedFile(fileData);
         if (fileData?.data?.[0]) {
@@ -84,6 +89,7 @@ const Dashboard = () => {
             setYAxis('');
         }
     };
+
     const handleDownload = () => {
         if (chartRef.current) {
             const link = document.createElement('a');
