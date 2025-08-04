@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 
-// Note the new '{ setUser }' prop for communicating with App.js
+// Note the new '{ setUser }' prop here. This is how App.js gives this component
+// the ability to change the main application's state.
 const Login = ({ setUser }) => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [message, setMessage] = useState('');
@@ -13,32 +14,33 @@ const Login = ({ setUser }) => {
     const onSubmit = async (e) => {
         e.preventDefault();
         try {
+            // We send the login request to the live backend server.
             const res = await axios.post('https://sheetsight.onrender.com/api/users/login', formData);
 
-            // 1. Store the token
+            // If the login is successful, we perform four actions:
+            // 1. Store the login token in the browser's memory.
             localStorage.setItem('token', res.data.token);
-            // 2. Store the entire user object (which includes the role) as a JSON string
+            // 2. Store the user's details (including their role) in memory.
             localStorage.setItem('user', JSON.stringify(res.data.user));
-
-            // 3. Update the state in the main App component to show the correct navbar
+            // 3. Call the 'setUser' function given to us by App.js to update the navbar.
             setUser(res.data.user);
-
+            
             setMessage('Login successful! Redirecting...');
             
-            // 4. Redirect to the dashboard
+            // 4. Navigate the user to the main dashboard page.
             navigate('/');
 
         } catch (err) {
-            // Clear any old data on failed login
+            // If the login fails, we clear any old data from memory.
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             setMessage(err.response.data.msg || 'Something went wrong');
         }
     };
 
-    // --- CSS Styles (no changes here) ---
+    // --- All the CSS styles for this component ---
     const styles = {
-        container: { minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f0f2f5' },
+        container: { minHeight: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' },
         card: { backgroundColor: 'white', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', maxWidth: '400px', width: '100%', textAlign: 'center' },
         title: { fontSize: '2rem', fontWeight: 'bold', color: '#333', marginBottom: '1rem' },
         form: { display: 'flex', flexDirection: 'column', gap: '1rem' },

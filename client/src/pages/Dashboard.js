@@ -3,7 +3,7 @@ import axios from 'axios';
 import ChartComponent from '../components/ChartComponent';
 
 const Dashboard = () => {
-    // --- STATE MANAGEMENT ---
+    // State variables
     const [file, setFile] = useState(null);
     const [message, setMessage] = useState('');
     const [fileHistory, setFileHistory] = useState([]);
@@ -15,7 +15,7 @@ const Dashboard = () => {
     const chartRef = useRef(null);
     const fileInputRef = useRef(null);
 
-    // --- DATA FETCHING & LOGIC ---
+    // Fetch history on component load
     const fetchFileHistory = async () => {
         const token = localStorage.getItem('token');
         if (!token) return;
@@ -29,18 +29,15 @@ const Dashboard = () => {
             setMessage('Could not fetch file history.');
         }
     };
+    useEffect(() => { fetchFileHistory(); }, []);
 
-    useEffect(() => {
-        fetchFileHistory();
-    }, []);
-
+    // Generate chart data when axes are selected
     useEffect(() => {
         if (selectedFile && xAxis !== '' && yAxis !== '') {
             const xIndex = parseInt(xAxis);
             const yIndex = parseInt(yAxis);
             const labels = selectedFile.data.map(row => row[xIndex] || '');
             const dataPoints = selectedFile.data.map(row => parseFloat(row[yIndex]) || 0);
-
             setChartData({
                 labels,
                 datasets: [{
@@ -56,11 +53,8 @@ const Dashboard = () => {
         }
     }, [selectedFile, xAxis, yAxis]);
 
-    const handleFileChange = (e) => {
-        setFile(e.target.files[0]);
-        setMessage('');
-    };
-
+    // Handler functions for user actions
+    const handleFileChange = (e) => setFile(e.target.files[0]);
     const handleUpload = async () => {
         if (!file) return;
         const formData = new FormData();
@@ -73,12 +67,11 @@ const Dashboard = () => {
             setMessage('Success: File uploaded!');
             setFile(null);
             if(fileInputRef.current) fileInputRef.current.value = "";
-            fetchFileHistory(); // Refresh list after upload
+            fetchFileHistory();
         } catch (error) {
             setMessage('Upload failed.');
         }
     };
-
     const handleFileSelect = (fileData) => {
         setSelectedFile(fileData);
         if (fileData?.data?.[0]) {
@@ -88,7 +81,6 @@ const Dashboard = () => {
             setYAxis('');
         }
     };
-
     const handleDownload = () => {
         if (chartRef.current) {
             const link = document.createElement('a');
@@ -98,9 +90,9 @@ const Dashboard = () => {
         }
     };
 
-    // --- PROFESSIONAL CSS STYLES ---
+    // --- ALL THE CSS STYLES ---
     const styles = {
-        dashboardContainer: { display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem', maxWidth: '1200px', margin: '2rem auto' },
+        dashboardContainer: { display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem', maxWidth: '1200px', margin: '0 auto' },
         leftColumn: { display: 'flex', flexDirection: 'column', gap: '2rem' },
         rightColumn: { display: 'flex', flexDirection: 'column' },
         card: { backgroundColor: 'white', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' },
@@ -118,9 +110,7 @@ const Dashboard = () => {
             <div style={styles.leftColumn}>
                 <div style={styles.card}>
                     <h2 style={styles.cardTitle}>📤 Upload New File</h2>
-                    <label htmlFor="file-upload" style={styles.fileInputLabel}>
-                        {file ? file.name : 'Choose File'}
-                    </label>
+                    <label htmlFor="file-upload" style={styles.fileInputLabel}>{file ? file.name : 'Choose File'}</label>
                     <input id="file-upload" type="file" ref={fileInputRef} onChange={handleFileChange} accept=".xls, .xlsx" style={{ display: 'none' }} />
                     <button onClick={handleUpload} style={styles.button} disabled={!file}>Upload Now</button>
                     {message && <p style={{ color: message.startsWith('Success') ? 'green' : 'red', marginTop: '1rem', textAlign: 'center' }}>{message}</p>}
@@ -131,8 +121,7 @@ const Dashboard = () => {
                         <ul style={styles.historyList}>
                             {fileHistory.map((item) => (
                                 <li key={item._id} onClick={() => handleFileSelect(item)} style={styles.historyItem}>
-                                    <span>{item.filename}</span>
-                                    <small>{new Date(item.createdAt).toLocaleDateString()}</small>
+                                    <span>{item.filename}</span><small>{new Date(item.createdAt).toLocaleDateString()}</small>
                                 </li>
                             ))}
                         </ul>
@@ -155,9 +144,7 @@ const Dashboard = () => {
                                 </div>
                             ) : <p>Please select both an X and Y axis to generate a chart.</p>}
                         </div>
-                    ) : (
-                        <p>Select a file from your history to begin analysis.</p>
-                    )}
+                    ) : ( <p>Select a file from your history to begin analysis.</p> )}
                 </div>
             </div>
         </div>

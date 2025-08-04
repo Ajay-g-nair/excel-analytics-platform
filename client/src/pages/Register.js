@@ -14,15 +14,16 @@ const Register = () => {
         try {
             await axios.post('https://sheetsight.onrender.com/api/users/register', formData);
             setMessage('Registration successful! Redirecting to login...');
+            // After 2 seconds, automatically send the user to the login page
             setTimeout(() => navigate('/login'), 2000);
         } catch (err) {
             setMessage(err.response.data.msg || 'Something went wrong');
         }
     };
 
-    // --- CSS Styles (consistent with Login page) ---
+    // --- CSS Styles (consistent with the Login page) ---
     const styles = {
-        container: { minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f0f2f5' },
+        container: { minHeight: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' },
         card: { backgroundColor: 'white', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', maxWidth: '400px', width: '100%', textAlign: 'center' },
         title: { fontSize: '2rem', fontWeight: 'bold', color: '#333', marginBottom: '1rem' },
         form: { display: 'flex', flexDirection: 'column', gap: '1rem' },
