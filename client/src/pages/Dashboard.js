@@ -20,7 +20,7 @@ const Dashboard = () => {
             const token = localStorage.getItem('token');
             if (!token) return;
             try {
-                const res = await axios.get('http://localhost:5000/api/files/my-files', {
+                const res = await axios.get('https://sheetsight.onrender.com/api/files/my-files', {
                     headers: { 'x-auth-token': token },
                 });
                 setFileHistory(res.data);
@@ -74,12 +74,12 @@ const Dashboard = () => {
             return;
         }
         try {
-            await axios.post('http://localhost:5000/api/files/upload', formData, {
+            await axios.post('https://sheetsight.onrender.com/api/files/upload', formData, {
                 headers: { 'Content-Type': 'multipart/form-data', 'x-auth-token': token },
             });
             setMessage('Success: File uploaded!');
             // After upload, refresh the history
-            const res = await axios.get('http://localhost:5000/api/files/my-files', {
+            const res = await axios.get('https://sheetsight.onrender.com/api/files/my-files', {
                 headers: { 'x-auth-token': token },
             });
             setFileHistory(res.data);

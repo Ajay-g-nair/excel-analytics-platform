@@ -12,7 +12,7 @@ const Register = () => {
     const onSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:5000/api/users/register', formData);
+            await axios.post('https://sheetsight.onrender.com/api/users/register', formData);
             setMessage('Registration successful! Redirecting to login...');
             setTimeout(() => navigate('/login'), 2000);
         } catch (err) {

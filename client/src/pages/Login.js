@@ -12,7 +12,7 @@ const Login = () => {
     const onSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post('http://localhost:5000/api/users/login', formData);
+            const res = await axios.post('https://sheetsight.onrender.com/api/users/login', formData);
             localStorage.setItem('token', res.data.token);
             setMessage('Login successful! Redirecting...');
             navigate('/');

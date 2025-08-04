@@ -28,7 +28,7 @@ const Analysis = () => {
 
             try {
                 // Fetch the data for this specific file from the backend
-                const res = await axios.get(`http://localhost:5000/api/files/${fileId}`, {
+                const res = await axios.get(`https://sheetsight.onrender.com/api/files/${fileId}`, {
                     headers: { 'x-auth-token': token },
                 });
 
