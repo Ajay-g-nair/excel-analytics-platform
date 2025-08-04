@@ -6,7 +6,8 @@ import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import Admin from './pages/Admin';
 import Guest from './pages/Guest';
-import GuestRoute from './components/GuestRoute'; // Import the new guard
+import GuestRoute from './components/GuestRoute';
+import AdminFiles from './pages/AdminFiles';
 
 const App = () => (<Router><Layout /></Router>);
 
@@ -35,10 +36,9 @@ const Layout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
-        navigate('/'); // On logout, go to the Guest page
+        navigate('/');
     };
 
-    // --- All CSS styles ---
     const navStyle = { backgroundColor: 'white', padding: '1rem 2rem', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
     const linkStyle = { textDecoration: 'none', color: '#007bff', margin: '0 10px', fontWeight: 'bold', cursor: 'pointer' };
     const logoStyle = { ...linkStyle, fontSize: '1.5rem', color: '#333' };
@@ -65,14 +65,12 @@ const Layout = () => {
             </nav>
             <main style={{ padding: '2rem' }}>
                 <Routes>
-                    {/* These routes are for guests. Logged-in users will be redirected. */}
                     <Route path="/" element={<GuestRoute><Guest /></GuestRoute>} />
                     <Route path="/login" element={<GuestRoute><Login setUser={setUser} /></GuestRoute>} />
                     <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
-                    
-                    {/* These routes are for logged-in users. Guests will be redirected. */}
                     <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                     <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+                    <Route path="/admin/files" element={<ProtectedRoute><AdminFiles /></ProtectedRoute>} />
                 </Routes>
             </main>
         </div>
