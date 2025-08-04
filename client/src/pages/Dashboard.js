@@ -3,7 +3,7 @@ import axios from 'axios';
 import ChartComponent from '../components/ChartComponent';
 
 const Dashboard = () => {
-    // State variables
+    // --- STATE MANAGEMENT ---
     const [file, setFile] = useState(null);
     const [message, setMessage] = useState('');
     const [fileHistory, setFileHistory] = useState([]);
@@ -15,7 +15,7 @@ const Dashboard = () => {
     const chartRef = useRef(null);
     const fileInputRef = useRef(null);
 
-    // Fetch history on component load
+    // --- DATA FETCHING & LOGIC ---
     const fetchFileHistory = async () => {
         const token = localStorage.getItem('token');
         if (!token) return;
@@ -29,15 +29,18 @@ const Dashboard = () => {
             setMessage('Could not fetch file history.');
         }
     };
-    useEffect(() => { fetchFileHistory(); }, []);
 
-    // Generate chart data when axes are selected
+    useEffect(() => {
+        fetchFileHistory();
+    }, []);
+
     useEffect(() => {
         if (selectedFile && xAxis !== '' && yAxis !== '') {
             const xIndex = parseInt(xAxis);
             const yIndex = parseInt(yAxis);
             const labels = selectedFile.data.map(row => row[xIndex] || '');
             const dataPoints = selectedFile.data.map(row => parseFloat(row[yIndex]) || 0);
+
             setChartData({
                 labels,
                 datasets: [{
@@ -53,8 +56,11 @@ const Dashboard = () => {
         }
     }, [selectedFile, xAxis, yAxis]);
 
-    // Handler functions for user actions
-    const handleFileChange = (e) => setFile(e.target.files[0]);
+    const handleFileChange = (e) => {
+        setFile(e.target.files[0]);
+        setMessage('');
+    };
+
     const handleUpload = async () => {
         if (!file) return;
         const formData = new FormData();
@@ -67,11 +73,12 @@ const Dashboard = () => {
             setMessage('Success: File uploaded!');
             setFile(null);
             if(fileInputRef.current) fileInputRef.current.value = "";
-            fetchFileHistory();
+            fetchFileHistory(); // Refresh list after upload
         } catch (error) {
             setMessage('Upload failed.');
         }
     };
+
     const handleFileSelect = (fileData) => {
         setSelectedFile(fileData);
         if (fileData?.data?.[0]) {
@@ -81,6 +88,7 @@ const Dashboard = () => {
             setYAxis('');
         }
     };
+
     const handleDownload = () => {
         if (chartRef.current) {
             const link = document.createElement('a');
@@ -90,7 +98,7 @@ const Dashboard = () => {
         }
     };
 
-    // --- ALL THE CSS STYLES ---
+    // --- PROFESSIONAL CSS STYLES ---
     const styles = {
         dashboardContainer: { display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem', maxWidth: '1200px', margin: '0 auto' },
         leftColumn: { display: 'flex', flexDirection: 'column', gap: '2rem' },
