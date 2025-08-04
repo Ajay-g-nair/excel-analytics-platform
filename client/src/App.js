@@ -36,9 +36,10 @@ const Layout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
-        navigate('/');
+        navigate('/'); // On logout, go back to the main login page
     };
 
+    // --- All CSS styles ---
     const navStyle = { backgroundColor: 'white', padding: '1rem 2rem', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
     const linkStyle = { textDecoration: 'none', color: '#007bff', margin: '0 10px', fontWeight: 'bold', cursor: 'pointer' };
     const logoStyle = { ...linkStyle, fontSize: '1.5rem', color: '#333' };
@@ -47,7 +48,8 @@ const Layout = () => {
     return (
         <div style={appStyle}>
             <nav style={navStyle}>
-                <Link to="/" style={logoStyle}>Sheetsight</Link>
+                {/* When you click the logo, it now checks if you're logged in */}
+                <Link to={user ? "/dashboard" : "/"} style={logoStyle}>Sheetsight</Link>
                 <div>
                     {user ? (
                         <>
@@ -65,9 +67,15 @@ const Layout = () => {
             </nav>
             <main style={{ padding: '2rem' }}>
                 <Routes>
-                    <Route path="/" element={<GuestRoute><Guest /></GuestRoute>} />
+                    {/* The root path '/' now goes to the Login page for new users */}
+                    <Route path="/" element={<GuestRoute><Login setUser={setUser} /></GuestRoute>} />
                     <Route path="/login" element={<GuestRoute><Login setUser={setUser} /></GuestRoute>} />
                     <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
+
+                    {/* The guest landing page is now at '/welcome' if you still want to see it */}
+                    <Route path="/welcome" element={<GuestRoute><Guest /></GuestRoute>} />
+                    
+                    {/* These routes are for logged-in users. */}
                     <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                     <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
                     <Route path="/admin/files" element={<ProtectedRoute><AdminFiles /></ProtectedRoute>} />
