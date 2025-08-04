@@ -36,7 +36,7 @@ const Layout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
-        navigate('/'); // On logout, go back to the main login page
+        navigate('/'); // On logout, go back to the main Guest page
     };
 
     // --- All CSS styles ---
@@ -48,7 +48,6 @@ const Layout = () => {
     return (
         <div style={appStyle}>
             <nav style={navStyle}>
-                {/* When you click the logo, it now checks if you're logged in */}
                 <Link to={user ? "/dashboard" : "/"} style={logoStyle}>Sheetsight</Link>
                 <div>
                     {user ? (
@@ -67,13 +66,12 @@ const Layout = () => {
             </nav>
             <main style={{ padding: '2rem' }}>
                 <Routes>
-                    {/* The root path '/' now goes to the Login page for new users */}
-                    <Route path="/" element={<GuestRoute><Login setUser={setUser} /></GuestRoute>} />
+                    {/* --- THIS IS THE CORRECTED ROUTING LOGIC --- */}
+                    
+                    {/* The root path '/' now goes to the Guest page for new users */}
+                    <Route path="/" element={<GuestRoute><Guest /></GuestRoute>} />
                     <Route path="/login" element={<GuestRoute><Login setUser={setUser} /></GuestRoute>} />
                     <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
-
-                    {/* The guest landing page is now at '/welcome' if you still want to see it */}
-                    <Route path="/welcome" element={<GuestRoute><Guest /></GuestRoute>} />
                     
                     {/* These routes are for logged-in users. */}
                     <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
