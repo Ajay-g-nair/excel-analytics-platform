@@ -6,11 +6,11 @@ import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import Admin from './pages/Admin';
 import Guest from './pages/Guest';
+import GuestRoute from './components/GuestRoute'; // Import the new guard
 
 const App = () => (<Router><Layout /></Router>);
 
 const Layout = () => {
-    // We initialize the user state by checking localStorage synchronously.
     const [user, setUser] = useState(() => {
         const storedUser = localStorage.getItem('user');
         try {
@@ -22,7 +22,6 @@ const Layout = () => {
     });
     const navigate = useNavigate();
 
-    // This effect is for syncing state between tabs.
     useEffect(() => {
         const handleStorageChange = () => {
             const storedUser = localStorage.getItem('user');
@@ -65,12 +64,13 @@ const Layout = () => {
                 </div>
             </nav>
             <main style={{ padding: '2rem' }}>
-                {/* Final check for deployment */}
                 <Routes>
-                    <Route path="/" element={<Guest />} />
-                    {/* We pass the 'setUser' function to Login so it can update the navbar */}
-                    <Route path="/login" element={<Login setUser={setUser} />} />
-                    <Route path="/register" element={<Register />} />
+                    {/* These routes are for guests. Logged-in users will be redirected. */}
+                    <Route path="/" element={<GuestRoute><Guest /></GuestRoute>} />
+                    <Route path="/login" element={<GuestRoute><Login setUser={setUser} /></GuestRoute>} />
+                    <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
+                    
+                    {/* These routes are for logged-in users. Guests will be redirected. */}
                     <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                     <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
                 </Routes>
