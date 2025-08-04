@@ -9,32 +9,29 @@ const Login = ({ setUser }) => {
 
     const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    const onSubmit = (e) => {
+    const onSubmit = async (e) => {
         e.preventDefault();
-        setMessage('Logging in...'); // Provide immediate feedback
-        
-        axios.post('https://sheetsight.onrender.com/api/users/login', formData)
-            .then(res => {
-                const { token, user } = res.data;
-                localStorage.setItem('token', token);
-                localStorage.setItem('user', JSON.stringify(user));
-                setUser(user);
-                
-                // Navigate based on role AFTER setting state
-                if (user.role === 'admin') {
-                    navigate('/admin');
-                } else {
-                    navigate('/dashboard');
-                }
-            })
-            .catch(err => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                setMessage(err.response?.data?.msg || 'Login failed. Please check your credentials.');
-            });
+        setMessage('Logging in...');
+        try {
+            const res = await axios.post('https://sheetsight.onrender.com/api/users/login', formData);
+            const { token, user, files } = res.data;
+
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user));
+            localStorage.setItem('fileHistory', JSON.stringify(files)); // Save initial history
+            
+            setUser(user);
+
+            if (user.role === 'admin') navigate('/admin');
+            else navigate('/dashboard');
+        } catch (err) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('fileHistory');
+            setMessage(err.response?.data?.msg || 'Login failed.');
+        }
     };
 
-    // --- All the CSS styles are unchanged ---
     const styles = {
         container: { minHeight: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' },
         card: { backgroundColor: 'white', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', maxWidth: '400px', width: '100%', textAlign: 'center' },
@@ -50,7 +47,7 @@ const Login = ({ setUser }) => {
         <div style={styles.container}>
             <div style={styles.card}>
                 <h1 style={styles.title}>Sign In</h1>
-                {message && <p style={{ ...styles.message, backgroundColor: message.startsWith('Logging in') || message.startsWith('Login successful') ? '#28a745' : '#dc3545' }}>{message}</p>}
+                {message && <p style={{ ...styles.message, backgroundColor: message.startsWith('Logging in') ? '#17a2b8' : '#dc3545' }}>{message}</p>}
                 <form onSubmit={onSubmit} style={styles.form}>
                     <input type="email" placeholder="Email Address" name="email" value={formData.email} onChange={onChange} required style={styles.input} />
                     <input type="password" placeholder="Password" name="password" value={formData.password} onChange={onChange} required style={styles.input} />

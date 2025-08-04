@@ -3,10 +3,12 @@ import axios from 'axios';
 import ChartComponent from '../components/ChartComponent';
 
 const Dashboard = () => {
-    // --- STATE MANAGEMENT ---
     const [file, setFile] = useState(null);
     const [message, setMessage] = useState('');
-    const [fileHistory, setFileHistory] = useState([]);
+    const [fileHistory, setFileHistory] = useState(() => {
+        const savedHistory = localStorage.getItem('fileHistory');
+        return savedHistory ? JSON.parse(savedHistory) : [];
+    });
     const [selectedFile, setSelectedFile] = useState(null);
     const [xAxis, setXAxis] = useState('');
     const [yAxis, setYAxis] = useState('');
@@ -15,52 +17,22 @@ const Dashboard = () => {
     const chartRef = useRef(null);
     const fileInputRef = useRef(null);
 
-    // --- DATA FETCHING & LOGIC ---
-    const fetchFileHistory = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-        try {
-            const res = await axios.get('https://sheetsight.onrender.com/api/files/my-files', {
-                headers: { 'x-auth-token': token },
-            });
-            setFileHistory(res.data);
-        } catch (err) {
-            console.error('Error fetching file history:', err);
-            setMessage('Could not fetch file history.');
-        }
-    };
-
-    useEffect(() => {
-        fetchFileHistory();
-    }, []);
-
     useEffect(() => {
         if (selectedFile && xAxis !== '' && yAxis !== '') {
             const xIndex = parseInt(xAxis);
             const yIndex = parseInt(yAxis);
             const labels = selectedFile.data.map(row => row[xIndex] || '');
             const dataPoints = selectedFile.data.map(row => parseFloat(row[yIndex]) || 0);
-
             setChartData({
                 labels,
-                datasets: [{
-                    label: `Data Analysis`,
-                    data: dataPoints,
-                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1,
-                }],
+                datasets: [{ label: `Data Analysis`, data: dataPoints, backgroundColor: 'rgba(75, 192, 192, 0.6)' }],
             });
         } else {
             setChartData(null);
         }
     }, [selectedFile, xAxis, yAxis]);
 
-    const handleFileChange = (e) => {
-        setFile(e.target.files[0]);
-        setMessage('');
-    };
-
+    const handleFileChange = (e) => setFile(e.target.files[0]);
     const handleUpload = async () => {
         if (!file) return;
         setMessage("Uploading...");
@@ -74,12 +46,14 @@ const Dashboard = () => {
             setMessage('Success: File uploaded!');
             setFile(null);
             if(fileInputRef.current) fileInputRef.current.value = "";
-            fetchFileHistory(); // Refresh list after upload
+            // After upload, we must refresh the history
+            const res = await axios.get('https://sheetsight.onrender.com/api/files/my-files', { headers: { 'x-auth-token': token } });
+            setFileHistory(res.data);
+            localStorage.setItem('fileHistory', JSON.stringify(res.data)); // Update localStorage too
         } catch (error) {
             setMessage('Upload failed.');
         }
     };
-
     const handleFileSelect = (fileData) => {
         setSelectedFile(fileData);
         if (fileData?.data?.[0]) {
@@ -89,7 +63,6 @@ const Dashboard = () => {
             setYAxis('');
         }
     };
-
     const handleDownload = () => {
         if (chartRef.current) {
             const link = document.createElement('a');
@@ -99,7 +72,6 @@ const Dashboard = () => {
         }
     };
 
-    // --- PROFESSIONAL CSS STYLES ---
     const styles = {
         dashboardContainer: { display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem', maxWidth: '1200px', margin: '0 auto' },
         leftColumn: { display: 'flex', flexDirection: 'column', gap: '2rem' },
