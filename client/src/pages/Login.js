@@ -9,42 +9,32 @@ const Login = ({ setUser }) => {
 
     const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    // --- THIS IS THE FUNCTION WE ARE DEBUGGING ---
-    const onSubmit = async (e) => {
-        // This prevents the whole page from reloading
+    const onSubmit = (e) => {
         e.preventDefault();
+        setMessage('Logging in...'); // Provide immediate feedback
         
-        console.log('DEBUG: 1. onSubmit function started.');
-        console.log('DEBUG: 2. Form data being sent:', formData);
-        
-        try {
-            console.log('DEBUG: 3. Attempting axios.post request...');
-            const res = await axios.post('https://sheetsight.onrender.com/api/users/login', formData);
-            
-            console.log('DEBUG: 4. SUCCESS! Received response from server:', res.data);
-            const { token, user } = res.data;
-
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
-            setUser(user);
-            setMessage('Login successful! Redirecting...');
-
-            if (user.role === 'admin') {
-                console.log('DEBUG: 5. User is an admin, navigating to /admin');
-                navigate('/admin');
-            } else {
-                console.log('DEBUG: 5. User is a regular user, navigating to /dashboard');
-                navigate('/dashboard');
-            }
-
-        } catch (err) {
-            console.log('DEBUG: 6. ERROR! The axios request failed.');
-            console.error('Full error object:', err);
-            setMessage(err.response?.data?.msg || 'Something went wrong');
-        }
+        axios.post('https://sheetsight.onrender.com/api/users/login', formData)
+            .then(res => {
+                const { token, user } = res.data;
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(user));
+                setUser(user);
+                
+                // Navigate based on role AFTER setting state
+                if (user.role === 'admin') {
+                    navigate('/admin');
+                } else {
+                    navigate('/dashboard');
+                }
+            })
+            .catch(err => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                setMessage(err.response?.data?.msg || 'Login failed. Please check your credentials.');
+            });
     };
 
-    // --- CSS Styles ---
+    // --- All the CSS styles are unchanged ---
     const styles = {
         container: { minHeight: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' },
         card: { backgroundColor: 'white', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', maxWidth: '400px', width: '100%', textAlign: 'center' },
@@ -60,20 +50,12 @@ const Login = ({ setUser }) => {
         <div style={styles.container}>
             <div style={styles.card}>
                 <h1 style={styles.title}>Sign In</h1>
-                
-                {message && (
-                    <p style={{ ...styles.message, backgroundColor: message.startsWith('Login successful') ? '#28a745' : '#dc3545' }}>
-                        {message}
-                    </p>
-                )}
-                
-                {/* Ensure the form has the onSubmit handler */}
+                {message && <p style={{ ...styles.message, backgroundColor: message.startsWith('Logging in') || message.startsWith('Login successful') ? '#28a745' : '#dc3545' }}>{message}</p>}
                 <form onSubmit={onSubmit} style={styles.form}>
                     <input type="email" placeholder="Email Address" name="email" value={formData.email} onChange={onChange} required style={styles.input} />
                     <input type="password" placeholder="Password" name="password" value={formData.password} onChange={onChange} required style={styles.input} />
                     <button type="submit" style={styles.button}>Login</button>
                 </form>
-                
                 <p style={{ marginTop: '1.5rem', fontSize: '0.9rem' }}>Don't have an account? <Link to="/register" style={styles.link}>Sign up</Link></p>
             </div>
         </div>
