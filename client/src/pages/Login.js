@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 
-// Note the new '{ setIsLoggedIn }' prop here
-const Login = ({ setIsLoggedIn }) => {
+// Note the new '{ setUser }' prop for communicating with App.js
+const Login = ({ setUser }) => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
@@ -14,24 +14,29 @@ const Login = ({ setIsLoggedIn }) => {
         e.preventDefault();
         try {
             const res = await axios.post('https://sheetsight.onrender.com/api/users/login', formData);
-            
+
             // 1. Store the token
             localStorage.setItem('token', res.data.token);
-            
-            // 2. THIS IS THE NEW LINE: Update the state in App.js to show the "Logout" button
-            setIsLoggedIn(true);
+            // 2. Store the entire user object (which includes the role) as a JSON string
+            localStorage.setItem('user', JSON.stringify(res.data.user));
+
+            // 3. Update the state in the main App component to show the correct navbar
+            setUser(res.data.user);
 
             setMessage('Login successful! Redirecting...');
             
-            // 3. Redirect to the dashboard
+            // 4. Redirect to the dashboard
             navigate('/');
 
         } catch (err) {
+            // Clear any old data on failed login
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
             setMessage(err.response.data.msg || 'Something went wrong');
         }
     };
 
-    // --- CSS Styles ---
+    // --- CSS Styles (no changes here) ---
     const styles = {
         container: { minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f0f2f5' },
         card: { backgroundColor: 'white', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', maxWidth: '400px', width: '100%', textAlign: 'center' },
