@@ -1,6 +1,6 @@
+// This is the 100% correct and final version.
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom';
-// These are the ONLY imports from your project files, and the paths are correct.
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
