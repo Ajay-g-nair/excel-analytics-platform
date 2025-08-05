@@ -1,11 +1,13 @@
-/* A simple CSS Reset */
-body, h1, h2, p, ul, li, form, input, button {
+body {
     margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: #f4f7f9; /* A light, clean, and professional background color */
 }
 
-body {
-    background-color: #f4f7f6;
+/* Optional: You can add a style for the main cursor */
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
 }

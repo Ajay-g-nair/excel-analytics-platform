@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 
-const Login = ({ setUser }) => {
+const Login = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
@@ -11,49 +11,42 @@ const Login = ({ setUser }) => {
 
     const onSubmit = async (e) => {
         e.preventDefault();
-        setMessage('Logging in...');
         try {
             const res = await axios.post('https://sheetsight.onrender.com/api/users/login', formData);
-            const { token, user, files } = res.data;
-
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
-            localStorage.setItem('fileHistory', JSON.stringify(files)); // Save initial history
-            
-            setUser(user);
-
-            if (user.role === 'admin') navigate('/admin');
-            else navigate('/dashboard');
+            localStorage.setItem('token', res.data.token);
+            setMessage('Login successful! Redirecting...');
+            navigate('/');
         } catch (err) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            localStorage.removeItem('fileHistory');
-            setMessage(err.response?.data?.msg || 'Login failed.');
+            setMessage(err.response.data.msg || 'Something went wrong');
         }
     };
 
     const styles = {
-        container: { minHeight: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' },
-        card: { backgroundColor: 'white', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', maxWidth: '400px', width: '100%', textAlign: 'center' },
-        title: { fontSize: '2rem', fontWeight: 'bold', color: '#333', marginBottom: '1rem' },
-        form: { display: 'flex', flexDirection: 'column', gap: '1rem' },
-        input: { width: '100%', padding: '12px', border: '1px solid #ccc', borderRadius: '4px', fontSize: '1rem' },
-        button: { backgroundColor: '#007bff', color: 'white', padding: '12px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '1rem', fontWeight: 'bold' },
-        link: { color: '#007bff', textDecoration: 'none' },
-        message: { padding: '10px', margin: '1rem 0', borderRadius: '4px', color: 'white' }
+        container: { minHeight: '90vh', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+        card: { backgroundColor: 'white', padding: '40px', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', maxWidth: '420px', width: '100%', textAlign: 'center' },
+        title: { fontSize: '2.5rem', fontWeight: 'bold', color: '#2c3e50', marginBottom: '1rem' },
+        subtitle: { color: '#7f8c8d', marginBottom: '2rem' },
+        form: { display: 'flex', flexDirection: 'column', gap: '1.25rem' },
+        input: { width: '100%', padding: '14px', border: '1px solid #dfe6e9', borderRadius: '8px', fontSize: '1rem' },
+        button: { background: 'linear-gradient(90deg, #3498db, #2980b9)', color: 'white', padding: '14px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '1.1rem', fontWeight: 'bold', transition: 'transform 0.2s' },
+        link: { color: '#3498db', textDecoration: 'none', fontWeight: 'bold' },
+        message: { padding: '12px', margin: '1rem 0', borderRadius: '8px', color: 'white' }
     };
 
     return (
         <div style={styles.container}>
             <div style={styles.card}>
-                <h1 style={styles.title}>Sign In</h1>
-                {message && <p style={{ ...styles.message, backgroundColor: message.startsWith('Logging in') ? '#17a2b8' : '#dc3545' }}>{message}</p>}
+                <h1 style={styles.title}>Welcome Back!</h1>
+                <p style={styles.subtitle}>Sign in to continue to Sheetsight</p>
+                {message && <p style={{...styles.message, backgroundColor: message.startsWith('Login successful') ? '#2ecc71' : '#e74c3c'}}>{message}</p>}
                 <form onSubmit={onSubmit} style={styles.form}>
                     <input type="email" placeholder="Email Address" name="email" value={formData.email} onChange={onChange} required style={styles.input} />
                     <input type="password" placeholder="Password" name="password" value={formData.password} onChange={onChange} required style={styles.input} />
-                    <button type="submit" style={styles.button}>Login</button>
+                    <button type="submit" style={styles.button}>Sign In</button>
                 </form>
-                <p style={{ marginTop: '1.5rem', fontSize: '0.9rem' }}>Don't have an account? <Link to="/register" style={styles.link}>Sign up</Link></p>
+                <p style={{ marginTop: '2rem', color: '#7f8c8d' }}>
+                    Don't have an account? <Link to="/register" style={styles.link}>Sign up</Link>
+                </p>
             </div>
         </div>
     );
