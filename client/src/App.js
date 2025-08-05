@@ -1,4 +1,4 @@
-// This is the 100% correct and final version.
+// This is the 100% correct and final version for App.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom';
 import Login from './pages/Login';
