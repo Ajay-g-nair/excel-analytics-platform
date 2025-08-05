@@ -1,8 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, useNavigate } from 'react-router-dom';
+// These are the correct import paths with forward slashes
 import Login from './pages/Login';
-import Register from './pages/Register'; // Corrected Path
-import Dashboard from './pages/Dashboard'; // Corrected Path
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
 
 const App = () => {
     const token = localStorage.getItem('token');
